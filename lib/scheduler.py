@@ -51,12 +51,12 @@ class ScheduledMedication:
         return self._id == __value._id and self._bag == __value._bag
 
 
-ScheduledMedicationsXX = TypedDict('ScheduledMedicationsXX',
-                                   {'intakes': list[MedicationIntake], 'schedules': list[MedicationScheduling]})
+ScheduledMedicationsItem = TypedDict('ScheduledMedicationsItem',
+                                     {'intakes': list[MedicationIntake], 'schedules': list[MedicationScheduling]})
 
 
 class Scheduler:
-    _scheduled_medicines: dict[MedicationId, ScheduledMedicationsXX]
+    _scheduled_medicines: dict[MedicationId, ScheduledMedicationsItem]
 
     def __init__(self) -> None:
         self._scheduled_medicines = {}
@@ -72,7 +72,7 @@ class Scheduler:
         return ScheduledMedication(last_schedule._id,
                                    {'when': intake, 'type': last_schedule._scheduling['type']})
 
-    def _xz(self, date_delta: timedelta, medicine_with_id: ScheduledMedicationsXX) -> datetime:
+    def _xz(self, date_delta: timedelta, medicine_with_id: ScheduledMedicationsItem) -> datetime:
         last_intake_date = self._next_intake_datetime(medicine_with_id)
         next_intake_from_last_intake = last_intake_date + date_delta
         return next_intake_from_last_intake
@@ -82,7 +82,7 @@ class Scheduler:
         next_intake_from_scheduling = last_schedule_date + date_delta
         return next_intake_from_scheduling
 
-    def _next_intake_datetime(self, scheduled_medication: ScheduledMedicationsXX) -> datetime:
+    def _next_intake_datetime(self, scheduled_medication: ScheduledMedicationsItem) -> datetime:
         return scheduled_medication['intakes'][-1]._bag['when']
 
     def add_medicine(self, medication_scheduling: MedicationScheduling) -> None:
