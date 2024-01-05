@@ -20,11 +20,13 @@ test: check-virtual-env typecheck test-python
 .PHONY: test
 
 test-python: check-virtual-env
-	pytest parser tests
+	pytest tests
 .PHONY: test-python
 
 typecheck: check-virtual-env
-	mypy . --exclude venv
+	$(eval FILES := $(shell find "." -type f -name '*.py' -not -path './venv/*' -prune))
+	@if [ -z "${FILES}" ]; then echo "nothing to do"; fi
+	mypy ${FILES}
 .PHONY: typecheck
 
 requirements: check-virtual-env requirements.txt
