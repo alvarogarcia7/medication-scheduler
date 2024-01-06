@@ -22,7 +22,7 @@ MedicationSchedulingItem = TypedDict('MedicationSchedulingItem', {'from': dateti
 
 
 class MedicationScheduling:
-    def __init__(self, id: MedicationId, tags: Any, scheduling: MedicationSchedulingItem):
+    def __init__(self, id: MedicationId, tags: list[str], scheduling: MedicationSchedulingItem):
         super().__init__()
         self._id = id
         self._tags = tags
@@ -52,14 +52,17 @@ class ScheduledMedication:
 
 
 ScheduledMedicationsItem = TypedDict('ScheduledMedicationsItem',
-                                     {'intakes': list[MedicationIntake], 'schedules': list[MedicationScheduling]})
+                                     {'id': MedicationId,
+                                      'tags': list[str],
+                                      'intakes': list[MedicationIntake],
+                                      'schedules': list[MedicationScheduling]})
 
 
 class Scheduler:
     _scheduled_medicines: dict[MedicationId, ScheduledMedicationsItem]
 
-    def __init__(self) -> None:
-        self._scheduled_medicines = {}
+    def __init__(self, scheduled_medicines: dict[MedicationId, ScheduledMedicationsItem]) -> None:
+        self._scheduled_medicines = scheduled_medicines
 
     def next_medicine_by_id(self, id: MedicationId) -> ScheduledMedication:
         assert id in self._scheduled_medicines.keys()
@@ -88,7 +91,7 @@ class Scheduler:
     def add_medicine(self, medication_scheduling: MedicationScheduling) -> None:
         scheduling__id = medication_scheduling._id
         if scheduling__id not in self._scheduled_medicines:
-            self._scheduled_medicines[scheduling__id] = {'intakes': [], 'schedules': []}
+            self._scheduled_medicines[scheduling__id] = {'intakes': [], 'schedules': [], 'id': scheduling__id, 'tags': medication_scheduling._tags}
         self._scheduled_medicines[scheduling__id]['schedules'].append(medication_scheduling)
 
     def register_intake(self, intake: MedicationIntake) -> None:

@@ -13,5 +13,6 @@ pre-commit==3.6.0
 pytest==7.4.4
 PyYAML==6.0.1
 setuptools==69.0.3
+types-PyYAML==6.0.12.12
 typing_extensions==4.9.0
 virtualenv==20.25.0

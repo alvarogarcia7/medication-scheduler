@@ -20,7 +20,7 @@ test: check-virtual-env typecheck test-python
 .PHONY: test
 
 test-python: check-virtual-env
-	pytest tests
+	cd tests/ && pytest .
 .PHONY: test-python
 
 typecheck: check-virtual-env

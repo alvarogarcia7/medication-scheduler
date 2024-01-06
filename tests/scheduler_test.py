@@ -8,7 +8,7 @@ class SchedulerTest(unittest.TestCase):
     MEDICATION_NAME = 'Inmediate 1'
 
     def setUp(self) -> None:
-        self.scheduler = Scheduler()
+        self.scheduler = Scheduler({})
 
     def test_the_intake_matches_the_schedule_perfectly(self) -> None:
         same_date = '2024-01-05T11:38:00+04'
@@ -48,7 +48,7 @@ class SchedulerTest(unittest.TestCase):
         self.assertEqual(self._create_scheduled_medicine(self.MEDICATION_NAME, '2024-01-05T15:38:00+04'), actual)
 
     def _create_medicine_scheduling(self, id: str, from_: str) -> MedicationScheduling:
-        return MedicationScheduling(MedicationId(id), {'tags': 'immediate'},
+        return MedicationScheduling(MedicationId(id), ['immediate'],
                                     {'from': datetime.fromisoformat(from_),
                                      'next': '4 hour',
                                      'type': 'PRN'})
