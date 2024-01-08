@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, TypedDict
+from itertools import chain
+from typing import Any, Dict, TypedDict, List
 
 
 class MedicationId:
@@ -91,7 +92,8 @@ class Scheduler:
     def add_medicine(self, medication_scheduling: MedicationScheduling) -> None:
         scheduling__id = medication_scheduling._id
         if scheduling__id not in self._scheduled_medicines:
-            self._scheduled_medicines[scheduling__id] = {'intakes': [], 'schedules': [], 'id': scheduling__id, 'tags': medication_scheduling._tags}
+            self._scheduled_medicines[scheduling__id] = {'intakes': [], 'schedules': [], 'id': scheduling__id,
+                                                         'tags': medication_scheduling._tags}
         self._scheduled_medicines[scheduling__id]['schedules'].append(medication_scheduling)
 
     def register_intake(self, intake: MedicationIntake) -> None:
@@ -108,3 +110,26 @@ class Scheduler:
             return timedelta(hours=int(text_description))
         else:
             assert False, 'Invalid/Unsupported time delta format: {}'.format(text_description)
+
+    def next_medicine_by_tag(self, tag: str) -> ScheduledMedication:
+        def flatten_list(nested_list: list[list[str]]) -> list[str]:
+            return list(chain.from_iterable(nested_list))
+
+        def unique_list(possibly_repeated_list: list[str]) -> list[str]:
+            return list(set(possibly_repeated_list))
+
+        all_registered_tags = unique_list(
+            flatten_list([scheduled_medicine['tags'] for scheduled_medicine in self._scheduled_medicines.values()]))
+        assert tag in all_registered_tags, f"The tag '{tag}' is not found among the registered tags: {sorted(all_registered_tags)}"
+
+        matching_scheduled_medicines_by_tag: list[ScheduledMedicationsItem] = list(
+            filter(lambda scheduled_medicine: tag in scheduled_medicine['tags'], self._scheduled_medicines.values()))
+        assert not len(matching_scheduled_medicines_by_tag) == 0, \
+            f"No matching scheduled medicines found for tag '{tag}'."
+        assert len(matching_scheduled_medicines_by_tag) == 1, 'TODO: Only supported one medicine matching by tag'
+
+        selected_medicine: ScheduledMedicationsItem = matching_scheduled_medicines_by_tag[0]
+
+        selected_medicine_id = selected_medicine['id']
+
+        return self.next_medicine_by_id(selected_medicine_id)

@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+from typing import Optional
 
 from lib.scheduler import Scheduler, MedicationScheduling, ScheduledMedication, MedicationId, MedicationIntake
 
@@ -47,8 +48,26 @@ class SchedulerTest(unittest.TestCase):
 
         self.assertEqual(self._create_scheduled_medicine(self.MEDICATION_NAME, '2024-01-05T15:38:00+04'), actual)
 
-    def _create_medicine_scheduling(self, id: str, from_: str) -> MedicationScheduling:
-        return MedicationScheduling(MedicationId(id), ['immediate'],
+    def test_find_the_next_scheduled_medication_by_tag(
+            self) -> None:
+        same_date = '2024-01-05T11:38:00+04'
+        self.scheduler.add_medicine(
+            self._create_medicine_scheduling(self.MEDICATION_NAME, same_date, tags=['immediate']))
+        self.scheduler.register_intake(self._create_intake(self.MEDICATION_NAME, same_date))
+
+        self.scheduler.add_medicine(
+            self._create_medicine_scheduling('not expected', same_date, tags=['not immediate']))
+
+        actual = self.scheduler.next_medicine_by_tag("immediate")
+
+        self.assertEqual(self._create_scheduled_medicine(self.MEDICATION_NAME, '2024-01-05T15:38:00+04'), actual)
+
+    def _create_medicine_scheduling(self, id: str, from_: str,
+                                    tags: Optional[list[str]] = None) -> MedicationScheduling:
+        if tags is None:
+            tags = ['immediate']
+        return MedicationScheduling(MedicationId(id),
+                                    tags,
                                     {'from': datetime.fromisoformat(from_),
                                      'next': '4 hour',
                                      'type': 'PRN'})
